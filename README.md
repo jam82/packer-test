@@ -21,6 +21,9 @@ Just some playing around with packer and vagrant for personal learning and docum
 ```shell
 make keyring
 make test
+make up
+echo "have fun ;-)"
+make destroy
 ```
 
 ## License and Author
