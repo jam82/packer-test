@@ -1,0 +1,88 @@
+{
+  "variables": {
+    "build_user": "{{ env `FFEBH_BUILD_USER` }}",
+    "build_pass": "{{ env `FFEBH_BUILD_PASS` }}",
+    "build_pass_crypted": "{{ env `FFEBH_BUILD_PASS_CRYPTED` }}",
+    "build_disk_size": "51200",
+    "build_guest_os_type": "Ubuntu_64",
+    "build_headless": "false",
+    "build_iso_urls": "iso/ubuntu-20.04-legacy-server-amd64.iso,http://cdimage.ubuntu.com/ubuntu-legacy-server/releases/20.04/release/ubuntu-20.04-legacy-server-amd64.iso",
+    "build_iso_checksum_type": "sha256",
+    "build_iso_checksum": "36f15879bd9dfd061cd588620a164a82972663fdd148cce1f70d57d314c21b73",
+    "build_vm_name": "ffebh-test"
+  },
+  "sensitive-variables": [
+    "build_pass",
+    "build_pass_crypted"
+  ],
+  "builders": [
+    {
+      "name": "vbox",
+      "type": "virtualbox-iso",
+      "boot_command": [
+        "<esc><esc><enter>",
+        "/install/vmlinuz ",
+        "auto=true ",
+        "console-setup/ask_detect=false ",
+        "console-setup/layout=Germany ",
+        "debian-installer/locale=de_DE.UTF-8 ",
+        "debconf/frontend=noninteractive ",
+        "initrd=/install/initrd.gz ",
+        "passwd/user-fullname={{ user `build_user` }} ",
+        "passwd/username={{ user `build_user` }} ",
+        "passwd/user-password-crypted={{ user `build_pass_crypted` }} ",
+        "passwd/user-default-groups=({{ user `build_user` }} sudo) ",
+        "priority=critical ",
+        "url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/test.cfg ",
+        "<enter>"
+      ],
+      "boot_wait": "5s",
+      "disk_size": "{{ user `build_disk_size` }}",
+      "guest_os_type": "{{ user `build_guest_os_type` }}",
+      "hard_drive_discard": false,
+      "hard_drive_interface": "scsi",
+      "headless": "{{ user `build_headless` }}",
+      "http_directory": "http",
+      "iso_urls": "{{ user `build_iso_urls` }}",
+      "iso_checksum_type": "{{ user `build_iso_checksum_type` }}",
+      "iso_checksum": "{{ user `build_iso_checksum` }}",
+      "ssh_username": "{{ user `build_user` }}",
+      "ssh_password": "{{ user `build_pass` }}",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "60m",
+      "shutdown_command": "echo '{{ user `build_user` }}' | sudo -S shutdown -P now",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "{{ user `build_vm_name` }}",
+      "vboxmanage": [
+          [ "modifyvm", "{{.Name}}", "--memory", "1024" ],
+          [ "modifyvm", "{{.Name}}", "--cpus", "2" ]
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "ansible_env_vars": [ 
+        "ANSIBLE_BECOME_PASS='{{ user `build_pass` }}'", 
+        "ANSIBLE_SSH_TRANSFER_METHOD=sftp",
+        "ANSIBLE_HOST_KEY_CHECKING=False", 
+        "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'"
+      ],
+      "galaxy_file": "ansible/requirements.yml",
+      "galaxy_force_install": "True",
+      "playbook_file": "ansible/main.yml",
+      "roles_path": "ansible/roles",
+      "user": "{{ user `build_user` }}"
+    }
+  ],
+  "post-processors": [
+    [
+      {
+        "output": "builds/{{.Provider}}/{{ user `build_vm_name` }}.box",
+        "type": "vagrant",
+        "compression_level": 9
+      }
+    ]
+  ]
+}

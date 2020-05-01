@@ -1,0 +1,12 @@
+---
+# playbook: packer templates
+# file: ansible/main.yml
+
+- hosts: all
+  become: yes
+  gather_facts: yes
+  vars:
+    virtualbox_guest_role_enabled: true
+  roles:
+    - packer-provision
+    - virtualbox-guest

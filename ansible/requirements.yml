@@ -1,0 +1,12 @@
+
+---
+# playbook: packer templates
+# file: ansible/requirements.yml
+
+- src: https://github.com/jam82/ansible-role-packer-provision
+  name: packer-provision
+  version: master
+
+- src: https://github.com/jam82/ansible-role-virtualbox-guest.git
+  name: virtualbox-guest
+  version: master
