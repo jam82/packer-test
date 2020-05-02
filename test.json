@@ -65,9 +65,9 @@
       "type": "ansible",
       "ansible_env_vars": [ 
         "ANSIBLE_BECOME_PASS='{{ user `build_pass` }}'", 
-        "ANSIBLE_SSH_TRANSFER_METHOD=sftp",
         "ANSIBLE_HOST_KEY_CHECKING=False", 
-        "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'"
+        "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'",
+        "ANSIBLE_SSH_TRANSFER_METHOD=sftp"
       ],
       "galaxy_file": "ansible/requirements.yml",
       "galaxy_force_install": "True",
